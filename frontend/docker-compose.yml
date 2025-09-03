@@ -1,0 +1,11 @@
+version: "3.8"
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      - SERPAPI_KEY=${SERPAPI_KEY}
+      - SUMMARIZER_MODEL=${SUMMARIZER_MODEL}
+    volumes:
+      - ./backend:/app
