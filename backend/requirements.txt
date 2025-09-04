@@ -9,3 +9,7 @@ transformers
 torch
 serpapi
 python-multipart
+duckduckgo-search
+beautifulsoup4
+fastapi
+uvicorn
