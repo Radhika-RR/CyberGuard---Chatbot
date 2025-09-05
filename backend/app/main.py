@@ -1,12 +1,26 @@
 # backend/app/main.py
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from app.utils.phishing_detector import predict_text
-from app.utils.chatbot_retrieval import answer as answer_from_kb
-from app.utils.chatbot_websearch import answer_from_web, fetch_web_results
+from fastapi.middleware.cors import CORSMiddleware
+from app.utils.phishing_detector import PhishingDetector
+from app.utils.chatbot_websearch import websearch_and_summarize
 import os
 
 app = FastAPI(title="CyberGuard Assistant API")
+
+# CORS for local dev
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # set your frontend URL in production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# load detector once
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+detector = PhishingDetector(model_path=os.path.join(BASE_DIR, "..", "..", "phish_model.joblib"),
+                            vec_path=os.path.join(BASE_DIR, "..", "..", "vectorizer.joblib"))
 
 class PhishRequest(BaseModel):
     text: str
@@ -18,26 +32,16 @@ class ChatRequest(BaseModel):
 def phish_predict(req: PhishRequest):
     if not req.text:
         raise HTTPException(status_code=400, detail="text required")
-    res = predict_text(req.text)
-    return res
-
-@app.post("/api/chat")
-def chat(req: ChatRequest):
-    """Fallback/local KB retrieval (faq JSON)."""
-    if not req.question:
-        raise HTTPException(status_code=400, detail="question required")
-    results = answer_from_kb(req.question, top_k=3)
-    return {"results": results}
+    result = detector.predict(req.text)
+    return result
 
 @app.post("/api/chat_web")
 def chat_web(req: ChatRequest):
-    """Web-enabled chat: search web + summarize + return sources."""
     if not req.question:
         raise HTTPException(status_code=400, detail="question required")
-    res = answer_from_web(req.question)
-    return res
+    out = websearch_and_summarize(req.question)
+    return out
 
-@app.get("/api/test_search")
-def test_search(q: str):
-    """Quick test endpoint to verify search API works (returns raw results)."""
-    return {"results": fetch_web_results(q)}
+@app.get("/health")
+def health():
+    return {"status": "ok"}

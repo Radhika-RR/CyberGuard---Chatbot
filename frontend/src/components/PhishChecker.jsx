@@ -1,49 +1,42 @@
 // frontend/src/components/PhishChecker.jsx
-import { useState } from "react";
-import { checkPhish } from "../services/api";
+import React, { useState } from "react";
+import API from "../services/api";
 
 export default function PhishChecker() {
   const [text, setText] = useState("");
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  async function onCheck() {
+  const submit = async (e) => {
+    e.preventDefault();
     setLoading(true);
     try {
-      const r = await checkPhish(text);
-      setResult(r);
-    } catch (e) {
-      setResult({ error: "Failed to contact backend." });
+      const res = await API.post("/api/phish/predict", { text });
+      setResult(res.data);
+    } catch (err) {
+      alert("Error: " + (err.response?.data?.detail || err.message));
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   return (
-    <div style={{ padding: 16 }}>
-      <h2>Phishing Checker</h2>
-      <textarea
-        rows={4}
-        cols={80}
-        placeholder="Paste URL or email text here..."
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-      />
-      <div>
-        <button onClick={onCheck} disabled={!text.trim() || loading}>
-          {loading ? "Checking..." : "Check"}
-        </button>
-      </div>
-
+    <div>
+      <h3>Phish Checker</h3>
+      <form onSubmit={submit}>
+        <textarea value={text} onChange={e=>setText(e.target.value)} placeholder="paste URL, email or text here" rows={6} />
+        <button type="submit">{loading ? "Checking..." : "Check"}</button>
+      </form>
       {result && (
-        <div style={{ marginTop: 12, whiteSpace: "pre-wrap" }}>
-          <strong>Prediction:</strong> {result.prediction}
-          <br />
-          <strong>Probability:</strong> {result.probability ?? "N/A"}
-          <br />
-          <strong>Features:</strong>
-          <pre>{JSON.stringify(result.features, null, 2)}</pre>
-          {result.error && <div style={{ color: "red" }}>{result.error}</div>}
+        <div>
+          <h4>{result.label.toUpperCase()}</h4>
+          <p>Probability: {(result.probability*100).toFixed(1)}%</p>
+          <h5>Top features</h5>
+          <ul>
+            {result.features.map((f, idx) => (
+              <li key={idx}>{f.feature} — contribution: {f.contribution.toFixed(4)}</li>
+            ))}
+          </ul>
         </div>
       )}
     </div>

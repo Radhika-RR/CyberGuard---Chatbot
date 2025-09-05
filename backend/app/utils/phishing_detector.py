@@ -1,46 +1,26 @@
 # backend/app/utils/phishing_detector.py
-import os
 import joblib
-from urllib.parse import urlparse
-import re
+import numpy as np
 
-MODEL_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "models", "phish_model.joblib")
-_model = None
+class PhishingDetector:
+    def __init__(self, model_path="../../phish_model.joblib", vec_path="../../vectorizer.joblib"):
+        self.model = joblib.load(model_path)
+        self.vectorizer = joblib.load(vec_path)
+        self.feature_names = self.vectorizer.get_feature_names_out()
 
-def load_model():
-    global _model
-    if _model is None:
-        if not os.path.exists(MODEL_PATH):
-            raise FileNotFoundError(f"Model not found at {MODEL_PATH}. Train and save it first.")
-        _model = joblib.load(MODEL_PATH)
-    return _model
+    def predict(self, text, top_n_features=5):
+        X = self.vectorizer.transform([text])
+        proba = float(self.model.predict_proba(X)[0][1])  # probability of '1' (phishing)
+        label = "phishing" if proba >= 0.5 else "safe"
 
-def url_features(url_text: str) -> dict:
-    parsed = urlparse(url_text)
-    hostname = parsed.hostname or ""
-    return {
-        "length": len(url_text),
-        "num_digits": sum(c.isdigit() for c in url_text),
-        "has_at": "@" in url_text,
-        "has_ip": bool(re.search(r"\b\d{1,3}(?:\.\d{1,3}){3}\b", url_text)),
-        "dots": url_text.count("."),
-        "hostname_len": len(hostname)
-    }
-
-def predict_text(text: str):
-    model = load_model()
-    try:
-        proba = None
-        if hasattr(model, "predict_proba"):
-            proba = float(model.predict_proba([text])[0][1])
-            pred = int(proba >= 0.5)
-        else:
-            pred = int(model.predict([text])[0])
-        return {
-            "prediction": "phishing" if pred == 1 else "legit",
-            "probability": proba,
-            "features": url_features(text)
-        }
-    except Exception as e:
-        # fallback: if model fails, return neutral info
-        return {"prediction": "unknown", "probability": None, "features": url_features(text), "error": str(e)}
+        # feature contribution
+        coef = self.model.coef_[0]  # shape (n_features,)
+        xarr = X.toarray()[0]
+        contrib = xarr * coef
+        # pick top positive contributions (most evidence for phishing)
+        idx = np.argsort(-contrib)[:top_n_features]
+        top_features = [
+            {"feature": self.feature_names[i], "value": float(xarr[i]), "contribution": float(contrib[i])}
+            for i in idx if xarr[i] > 0
+        ]
+        return {"label": label, "probability": proba, "features": top_features}

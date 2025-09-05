@@ -1,63 +1,42 @@
 // frontend/src/components/Chatbot.jsx
-import { useState } from "react";
-import { askChatWeb } from "../services/api";
+import React, { useState } from "react";
+import API from "../services/api";
 
 export default function Chatbot() {
-  const [q, setQ] = useState("");
-  const [answer, setAnswer] = useState(null);
+  const [question, setQuestion] = useState("");
+  const [resp, setResp] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
-  async function onAsk() {
+  const ask = async (e) => {
+    e.preventDefault();
     setLoading(true);
-    setError(null);
     try {
-      const r = await askChatWeb(q);
-      setAnswer(r);
-    } catch (e) {
-      setError("Failed to fetch answer. Check backend and SERPAPI key.");
+      const r = await API.post("/api/chat_web", { question });
+      setResp(r.data);
+    } catch (err) {
+      alert("Error: " + (err.response?.data?.detail || err.message));
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   return (
-    <div style={{ padding: 16 }}>
-      <h2>Cyber Awareness Chat (Web Enabled)</h2>
-      <div>
-        <input
-          type="text"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          style={{ width: "70%" }}
-          placeholder="Ask anything about cybersecurity..."
-        />
-        <button onClick={onAsk} disabled={loading || !q.trim()}>
-          {loading ? "Searching..." : "Ask"}
-        </button>
-      </div>
+    <div>
+      <h3>Cybersecurity Chatbot</h3>
+      <form onSubmit={ask}>
+        <input value={question} onChange={e=>setQuestion(e.target.value)} placeholder="How to detect phishing emails?" />
+        <button type="submit">{loading ? "Searching..." : "Ask"}</button>
+      </form>
 
-      {error && <div style={{ color: "red", marginTop: 8 }}>{error}</div>}
-
-      {answer && (
-        <div style={{ marginTop: 16 }}>
-          <h4>Summary</h4>
-          <p>{answer.summary || "No summary available."}</p>
-
-          <h4>Sources</h4>
+      {resp && (
+        <div>
+          <h4>Answer</h4>
+          <p>{resp.summary}</p>
+          <h5>Sources</h5>
           <ul>
-            {Array.isArray(answer.sources) && answer.sources.length > 0 ? (
-              answer.sources.map((s, i) => (
-                <li key={i} style={{ marginBottom: 8 }}>
-                  <a href={s.link} target="_blank" rel="noreferrer">
-                    {s.title || s.link}
-                  </a>
-                  <div style={{ fontSize: 13 }}>{s.snippet}</div>
-                </li>
-              ))
-            ) : (
-              <li>No sources found.</li>
-            )}
+            {resp.sources.map((s, i) => (
+              <li key={i}><a href={s.link} target="_blank" rel="noreferrer">{s.title || s.link}</a></li>
+            ))}
           </ul>
         </div>
       )}
