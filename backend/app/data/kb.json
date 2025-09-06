@@ -1,5 +1,65 @@
 {
-  "what is phishing": "Phishing is a cyber attack where attackers trick users into revealing sensitive information by pretending to be a trustworthy entity, usually via email or fake websites.",
-  "how to create a strong password": "Use at least 12 characters, mix uppercase and lowercase letters, numbers, and special symbols. Avoid dictionary words or personal info.",
-  "what is ransomware": "Ransomware is malicious software that encrypts files on a victim’s system and demands payment (a ransom) for decryption."
+  "faqs": [
+    {
+      "question": "How to detect phishing emails?",
+      "answer": "Look for suspicious sender addresses, urgent language, requests for personal information, unexpected attachments, and links to unfamiliar websites. Always verify sender identity through a separate channel.",
+      "keywords": ["phishing", "email", "detect", "suspicious", "scam"]
+    },
+    {
+      "question": "What is two-factor authentication?",
+      "answer": "Two-factor authentication (2FA) is a security method that requires two different verification factors: something you know (password) and something you have (phone, token, or app). It significantly increases account security.",
+      "keywords": ["2FA", "two-factor", "authentication", "security", "password"]
+    },
+    {
+      "question": "How to create strong passwords?",
+      "answer": "Use at least 12 characters with a mix of uppercase, lowercase, numbers, and symbols. Avoid personal information, use unique passwords for each account, and consider using a password manager.",
+      "keywords": ["password", "strong", "secure", "create", "characters"]
+    },
+    {
+      "question": "What is malware?",
+      "answer": "Malware is malicious software designed to harm, exploit, or gain unauthorized access to computer systems. Types include viruses, trojans, ransomware, spyware, and adware.",
+      "keywords": ["malware", "virus", "trojan", "ransomware", "spyware", "malicious"]
+    },
+    {
+      "question": "How to secure WiFi networks?",
+      "answer": "Use WPA3 or WPA2 encryption, change default router passwords, use strong network passwords, disable WPS, enable network firewalls, and regularly update router firmware.",
+      "keywords": ["wifi", "wireless", "network", "secure", "encryption", "router"]
+    },
+    {
+      "question": "What is social engineering?",
+      "answer": "Social engineering is the psychological manipulation of people to divulge confidential information or perform actions that compromise security. Common tactics include phishing, pretexting, and baiting.",
+      "keywords": ["social", "engineering", "manipulation", "psychological", "tactics"]
+    },
+    {
+      "question": "How to backup data safely?",
+      "answer": "Follow the 3-2-1 rule: 3 copies of data, 2 different storage types, 1 offsite backup. Use encrypted backups, test restoration regularly, and automate the process when possible.",
+      "keywords": ["backup", "data", "safe", "storage", "encryption", "restore"]
+    },
+    {
+      "question": "What is a VPN and why use it?",
+      "answer": "A VPN (Virtual Private Network) creates an encrypted connection between your device and a server, protecting your data and privacy. Use it on public WiFi, for privacy, or to access geo-restricted content.",
+      "keywords": ["VPN", "virtual", "private", "network", "encrypted", "privacy"]
+    },
+    {
+      "question": "How to recognize fake websites?",
+      "answer": "Check for HTTPS, verify URLs carefully, look for spelling errors, check domain age and reputation, be wary of too-good-to-be-true offers, and use website reputation tools.",
+      "keywords": ["fake", "website", "recognize", "scam", "fraudulent", "suspicious"]
+    },
+    {
+      "question": "What to do if hacked?",
+      "answer": "Immediately change all passwords, enable 2FA, check account activities, run antivirus scans, monitor financial accounts, report to relevant authorities, and consider professional help.",
+      "keywords": ["hacked", "compromised", "breach", "response", "recovery", "help"]
+    }
+  ],
+  "categories": [
+    "phishing",
+    "authentication",
+    "passwords",
+    "malware",
+    "network_security",
+    "social_engineering",
+    "data_protection",
+    "privacy",
+    "incident_response"
+  ]
 }
